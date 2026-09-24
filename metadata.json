@@ -1,0 +1,6 @@
+{
+  "name": "HavenStay - PG & Co-Living Booking Platform",
+  "description": "Dedicated single-property website for Haven Coliving & Suites in Koramangala, featuring room configurations, transparent pricing, zero brokerage direct reservation, and tenant portal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,226 @@
+{
+  "entities": {
+    "pg": {
+      "title": "PG Property",
+      "description": "Details of the Haven Stay PG residence and rooms",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 128 },
+        "slug": { "type": "string", "maxLength": 128 },
+        "tagline": { "type": "string", "maxLength": 256 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "gender": { "type": "string", "enum": ["girls", "boys", "unisex"] },
+        "rating": { "type": "number" },
+        "reviewCount": { "type": "number" },
+        "startingPrice": { "type": "number" },
+        "images": { "type": "array" },
+        "amenities": { "type": "array" },
+        "rules": { "type": "array" },
+        "foodProvided": { "type": "boolean" },
+        "foodDetails": { "type": "string", "maxLength": 500 },
+        "roomOptions": { "type": "array" },
+        "owner": { "type": "object" },
+        "location": { "type": "object" },
+        "verified": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "startingPrice"]
+    },
+    "booking": {
+      "title": "Resident Booking",
+      "description": "A booking made by a resident for a room at Haven Stay",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "pgId": { "type": "string", "maxLength": 128 },
+        "pgName": { "type": "string", "maxLength": 128 },
+        "roomType": { "type": "string", "enum": ["single", "double", "triple"] },
+        "roomName": { "type": "string", "maxLength": 128 },
+        "checkInDate": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["confirmed", "pending", "cancelled", "checked_in", "checked_out"] },
+        "totalMonthlyRent": { "type": "number" },
+        "securityDeposit": { "type": "number" },
+        "residentName": { "type": "string", "maxLength": 128 },
+        "residentPhone": { "type": "string", "maxLength": 32 },
+        "residentEmail": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "pgId", "roomType", "userId", "residentName", "residentPhone", "checkInDate"]
+    },
+    "review": {
+      "title": "Resident Review",
+      "description": "Verified resident feedback and rating",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "pgId": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "userName": { "type": "string", "maxLength": 128 },
+        "userAvatar": { "type": "string", "maxLength": 512 },
+        "rating": { "type": "number" },
+        "comment": { "type": "string", "maxLength": 1500 },
+        "verifiedStay": { "type": "boolean" },
+        "categories": { "type": "object" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "pgId", "userId", "userName", "rating", "comment"]
+    },
+    "visit": {
+      "title": "Property Visit Request",
+      "description": "Scheduled in-person tour requested by a prospective resident",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "pgId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 128 },
+        "phone": { "type": "string", "maxLength": 32 },
+        "date": { "type": "string", "maxLength": 64 },
+        "roomType": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["scheduled", "completed", "cancelled"] },
+        "userId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "phone", "date"]
+    },
+    "user": {
+      "title": "User Profile",
+      "description": "User profile document stored at users/{uid}",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 128 },
+        "photoURL": { "type": "string", "maxLength": 1024 },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    },
+    "tenant": {
+      "title": "Tenant Record",
+      "description": "Separated tenant registry containing assigned room, lease terms, KYC, and financial status",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "fullName": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 128 },
+        "phone": { "type": "string", "maxLength": 32 },
+        "emergencyContactName": { "type": "string", "maxLength": 128 },
+        "emergencyContactPhone": { "type": "string", "maxLength": 32 },
+        "pgId": { "type": "string", "maxLength": 128 },
+        "pgName": { "type": "string", "maxLength": 128 },
+        "roomNumber": { "type": "string", "maxLength": 32 },
+        "bedNumber": { "type": "string", "maxLength": 32 },
+        "roomType": { "type": "string", "enum": ["single", "double", "triple", "four_sharing"] },
+        "monthlyRent": { "type": "number" },
+        "securityDeposit": { "type": "number" },
+        "depositPaid": { "type": "boolean" },
+        "leaseStartDate": { "type": "string", "maxLength": 64 },
+        "leaseEndDate": { "type": "string", "maxLength": 64 },
+        "kycStatus": { "type": "string", "enum": ["verified", "pending", "rejected"] },
+        "kycDocType": { "type": "string", "maxLength": 64 },
+        "employmentType": { "type": "string", "enum": ["working_professional", "student"] },
+        "companyOrCollege": { "type": "string", "maxLength": 128 },
+        "pendingDue": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "notice_period", "vacated"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "fullName", "phone", "roomNumber", "monthlyRent"]
+    },
+    "admin": {
+      "title": "Admin Profile",
+      "description": "Separated administrative staff records, permissions, and security roles",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "fullName": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 128 },
+        "phone": { "type": "string", "maxLength": 32 },
+        "designation": { "type": "string", "maxLength": 128 },
+        "role": { "type": "string", "enum": ["super_admin", "property_manager", "accountant"] },
+        "permissions": { "type": "array" },
+        "lastActive": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "fullName", "email", "designation"]
+    },
+    "admin_log": {
+      "title": "Admin Audit Log",
+      "description": "Immutable security and audit log for tracking administrative operations",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "adminId": { "type": "string", "maxLength": 128 },
+        "adminName": { "type": "string", "maxLength": 128 },
+        "action": { "type": "string", "maxLength": 256 },
+        "category": { "type": "string", "enum": ["tenant", "inventory", "billing", "maintenance", "system"] },
+        "details": { "type": "string", "maxLength": 1000 },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "adminName", "action", "timestamp"]
+    },
+    "maintenance_request": {
+      "title": "Maintenance & Complaint Ticket",
+      "description": "Tenant maintenance and repair requests tracked to resolution by management",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "tenantId": { "type": "string", "maxLength": 128 },
+        "tenantName": { "type": "string", "maxLength": 128 },
+        "tenantPhone": { "type": "string", "maxLength": 32 },
+        "pgId": { "type": "string", "maxLength": 128 },
+        "roomNumber": { "type": "string", "maxLength": 32 },
+        "category": { "type": "string", "enum": ["plumbing", "electrical", "wifi", "cleaning", "food", "appliance", "other"] },
+        "title": { "type": "string", "maxLength": 128 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "priority": { "type": "string", "enum": ["urgent", "medium", "low"] },
+        "status": { "type": "string", "enum": ["open", "in_progress", "resolved"] },
+        "assignedTo": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string" },
+        "resolvedAt": { "type": "string" }
+      },
+      "required": ["id", "tenantName", "roomNumber", "title", "status"]
+    }
+  },
+  "firestore": {
+    "/pgs/{pgId}": {
+      "schema": { "$ref": "pg" },
+      "description": "Main PG residence listing with details, photos, and room types"
+    },
+    "/bookings/{bookingId}": {
+      "schema": { "$ref": "booking" },
+      "description": "Room bookings reserved by residents"
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "review" },
+      "description": "Reviews and ratings submitted by residents"
+    },
+    "/visits/{visitId}": {
+      "schema": { "$ref": "visit" },
+      "description": "Free property tour visit appointments"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "user" },
+      "description": "User profiles for authenticated residents and manager"
+    },
+    "/tenants/{tenantId}": {
+      "schema": { "$ref": "tenant" },
+      "description": "Dedicated database collection storing tenant records, leases, room allocations, and KYC data"
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "admin" },
+      "description": "Dedicated database collection storing administrator staff profiles and privileged roles"
+    },
+    "/admin_logs/{logId}": {
+      "schema": { "$ref": "admin_log" },
+      "description": "Audit and activity log of management actions taken in the admin portal"
+    },
+    "/maintenance_requests/{requestId}": {
+      "schema": { "$ref": "maintenance_request" },
+      "description": "Tenant maintenance requests and resolution tracking"
+    }
+  }
+}

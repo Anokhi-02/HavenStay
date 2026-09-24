@@ -1,0 +1,137 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Connectivity test document
+    match /test/connection {
+      allow read: if true;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'nishirajput296@gmail.com' ||
+        (request.auth.token.email_verified == true && request.auth.token.email == 'nishirajput296@gmail.com')
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation for Reviews
+    function isValidReview(data) {
+      return data.pgId is string && data.pgId.size() <= 128 &&
+             data.userId is string && data.userId.size() <= 128 &&
+             data.userName is string && data.userName.size() <= 128 &&
+             data.comment is string && data.comment.size() <= 1500 &&
+             data.rating is number && data.rating >= 1 && data.rating <= 5;
+    }
+
+    // Validation for Bookings
+    function isValidBooking(data) {
+      return data.pgId is string && data.pgId.size() <= 128 &&
+             data.userId is string && data.userId.size() <= 128 &&
+             data.residentName is string && data.residentName.size() <= 128 &&
+             data.residentPhone is string && data.residentPhone.size() <= 32 &&
+             data.roomType is string && data.roomType.size() <= 32;
+    }
+
+    // Validation for Visits
+    function isValidVisit(data) {
+      return data.name is string && data.name.size() <= 128 &&
+             data.phone is string && data.phone.size() <= 32 &&
+             data.date is string && data.date.size() <= 64;
+    }
+
+    // Validation for Users
+    function isValidUser(data) {
+      return (!('email' in data) || (data.email is string && data.email.size() <= 128)) &&
+             (!('name' in data) || (data.name is string && data.name.size() <= 128)) &&
+             (!('fullName' in data) || (data.fullName is string && data.fullName.size() <= 128)) &&
+             (!('uid' in data) || (data.uid is string && data.uid.size() <= 128)) &&
+             (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 1024)) &&
+             (!('role' in data) || (data.role in ['user', 'admin']));
+    }
+
+    // PGs / Properties collection (Public read, admin write)
+    match /pgs/{pgId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin() && isValidId(pgId);
+    }
+
+    // Reviews collection (Public read, verified authenticated residents can create/update own review)
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidId(reviewId) &&
+                       incoming().userId == request.auth.uid &&
+                       isValidReview(incoming());
+      allow update: if isSignedIn() && isValidId(reviewId) &&
+                       (isAdmin() || (existing().userId == request.auth.uid && incoming().userId == request.auth.uid && isValidReview(incoming())));
+      allow delete: if isSignedIn() && (isAdmin() || existing().userId == request.auth.uid);
+    }
+
+    // Bookings collection (User can read own bookings, create own booking, cancel/update status; admin has full access)
+    match /bookings/{bookingId} {
+      allow get, list: if isSignedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && isValidId(bookingId) &&
+                       incoming().userId == request.auth.uid &&
+                       isValidBooking(incoming());
+      allow update: if isSignedIn() && isValidId(bookingId) &&
+                       (isAdmin() || (existing().userId == request.auth.uid && incoming().userId == request.auth.uid));
+      allow delete: if isAdmin();
+    }
+
+    // Visits collection (Anyone can request a visit, admin and creator can view)
+    match /visits/{visitId} {
+      allow get, list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isValidId(visitId) && isValidVisit(incoming());
+      allow update, delete: if isAdmin();
+    }
+
+    // User profiles (User can read/write their own profile; admin has full access)
+    match /users/{userId} {
+      allow get: if isSignedIn() && (isAdmin() || request.auth.uid == userId);
+      allow list: if isAdmin();
+      allow create, update: if isSignedIn() && (isAdmin() || request.auth.uid == userId);
+      allow delete: if isAdmin();
+    }
+
+    // Dedicated Tenants collection (Tenant can read own file, Admins have full control)
+    match /tenants/{tenantId} {
+      allow get: if isSignedIn() && (isAdmin() || request.auth.uid == tenantId);
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Dedicated Admins collection (Restricted exclusively to authorized administrators)
+    match /admins/{adminId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Admin Audit Logs (Restricted exclusively to authorized administrators)
+    match /admin_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Maintenance & Complaints collection
+    match /maintenance_requests/{requestId} {
+      allow get, list: if isSignedIn() && (isAdmin() || resource.data.tenantId == request.auth.uid);
+      allow create: if isSignedIn() && isValidId(requestId);
+      allow update, delete: if isAdmin();
+    }
+  }
+}
